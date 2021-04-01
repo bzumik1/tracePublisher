@@ -16,7 +16,8 @@ public class Main {
     private final static String server = "localhost";
     private final static String port = "1883";
     private final static String publisherId = UUID.randomUUID().toString();
-    private final static String topic = "fftInit";
+    private final static String topic = "newOne";
+    private static int counter = 0;
 
     public static void main(String[] args) throws MqttException, IOException {
         IMqttClient mqttClient = new MqttClient("tcp://"+server+":"+port, publisherId);
@@ -28,8 +29,11 @@ public class Main {
         mqttClient.connect(options);
 
         try (Stream<Path> traces = Files.walk(Paths.get("src/main/resources/traces"))) {
-            traces.map(t -> {
+            traces.filter(Files::isRegularFile).filter(f -> f.toString().endsWith(".json")).map(t -> {
                 try {
+                    counter++;
+                    System.out.println("TRACE "+counter+".");
+                    System.out.println(t);
                     return Files.readAllBytes(t);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -37,20 +41,15 @@ public class Main {
                 }
             }).forEach( t -> {
                 System.out.println(new String(t));
+                System.out.println();
                 try {
-                    mqttClient.publish(topic, t, 0, true);
-                    Thread.sleep(20000);
-                } catch (MqttException | InterruptedException e) {
+                    mqttClient.publish(topic, t, 0, false);
+                } catch (MqttException e) {
                     e.printStackTrace();
                 }
-                //mqttClient.publish(topic,new MqttMessage(t));
             });
         }
 
-
-
-
-
-        System.out.println("Test!");
+        System.out.println("FINISHED!");
     }
 }
