@@ -15,8 +15,8 @@ import java.util.stream.Stream;
 public class Main {
     private final static String server = "localhost";
     private final static String port = "1883";
-    private final static String publisherId = UUID.randomUUID().toString();
-    private final static String topic = "newOne";
+    private final static String publisherId = "initialPublisher";
+    private final static String topic = "test";
     private static int counter = 0;
 
     public static void main(String[] args) throws MqttException, IOException {
@@ -51,5 +51,7 @@ public class Main {
         }
 
         System.out.println("FINISHED!");
+        mqttClient.disconnect();
+        mqttClient.close();
     }
 }
